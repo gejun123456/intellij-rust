@@ -266,7 +266,9 @@ project(":idea") {
     intellij {
         version = ideaVersion
         if (isAtLeast192) {
-            setPlugins("java")
+            setPlugins(project(":intellij-toml"), "java")
+        } else {
+            setPlugins(project(":intellij-toml"))
         }
     }
     dependencies {
@@ -312,9 +314,9 @@ project(":toml") {
 project(":intelliLang") {
     intellij {
         if (isAtLeast192 && baseIDE == "idea") {
-            setPlugins("IntelliLang", "java")
+            setPlugins(project(":intellij-toml"), "IntelliLang", "java")
         } else {
-            setPlugins("IntelliLang")
+            setPlugins(project(":intellij-toml"), "IntelliLang")
         }
     }
     dependencies {
@@ -327,9 +329,9 @@ project(":copyright") {
     intellij {
         version = ideaVersion
         if (isAtLeast192) {
-            setPlugins("copyright", "java")
+            setPlugins(project(":intellij-toml"), "copyright", "java")
         } else {
-            setPlugins("copyright")
+            setPlugins(project(":intellij-toml"), "copyright")
         }
     }
     dependencies {
@@ -341,7 +343,9 @@ project(":copyright") {
 project(":duplicates") {
     intellij {
         if (isAtLeast192 && baseIDE == "idea") {
-            setPlugins("java")
+            setPlugins(project(":intellij-toml"), "java")
+        } else {
+            setPlugins(project(":intellij-toml"))
         }
     }
     dependencies {
