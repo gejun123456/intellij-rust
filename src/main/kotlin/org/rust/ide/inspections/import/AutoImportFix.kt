@@ -51,7 +51,7 @@ class AutoImportFix(element: RsElement) : LocalQuickFixOnPsiElement(element), Hi
         val element = startElement as? RsElement ?: return
         val (_, candidates) = when (element) {
             is RsPath -> findApplicableContext(project, element) ?: return
-            is RsMethodCall -> findApplicableContext(project, element)  ?: return
+            is RsMethodCall -> findApplicableContext(project, element) ?: return
             else -> return
         }
 
@@ -169,7 +169,7 @@ class AutoImportFix(element: RsElement) : LocalQuickFixOnPsiElement(element), Hi
                 .flatMap { it.withModuleReexports(project).asSequence() }
                 .mapNotNull { it.toImportCandidate(importContext.superMods) }
                 .filterImportCandidates(importContext.attributes)
-                // check that result after import can be resolved and resolved element is suitable
+                // check result after import can be resolved and resolved element is suitable
                 // if no, don't add it in candidate list
                 .filter { canBeResolvedToSuitableItem(importingPathText, importContext, it.info) }
         }
@@ -322,7 +322,8 @@ class AutoImportFix(element: RsElement) : LocalQuickFixOnPsiElement(element), Hi
                 info.externCrateName
             }
             val path = RsCodeFragmentFactory(context.project)
-                .createPathInTmpMod(importingPathName, context.mod, context.ns, info.usePath, externCrateName) ?: return false
+                .createPathInTmpMod(importingPathName, context.mod, context.ns, info.usePath, externCrateName)
+                ?: return false
             val element = path.reference.deepResolve() as? RsQualifiedNamedElement ?: return false
             if (!context.namespaceFilter(element)) return false
             return !(element.parent is RsMembers && element.ancestorStrict<RsTraitItem>() != null)
@@ -370,10 +371,10 @@ class AutoImportFix(element: RsElement) : LocalQuickFixOnPsiElement(element), Hi
                 candidate to attributes
             }
 
-            val condition: (RsFile.Attributes) -> Boolean = if (hasImportWithSameAttributes) {
-                attributes -> attributes == fileAttributes
-            } else {
-                attributes -> attributes < fileAttributes
+            val condition: (RsFile.Attributes) -> Boolean = if (hasImportWithSameAttributes) { attributes ->
+                attributes == fileAttributes
+            } else { attributes ->
+                attributes < fileAttributes
             }
             return candidateToAttributes.mapNotNull { (candidate, attributes) ->
                 if (condition(attributes)) candidate else null
@@ -423,7 +424,7 @@ sealed class ImportInfo {
 
     abstract val usePath: String
 
-    class LocalImportInfo(override val usePath: String): ImportInfo()
+    class LocalImportInfo(override val usePath: String) : ImportInfo()
 
     class ExternCrateImportInfo(
         val target: CargoWorkspace.Target,
@@ -655,17 +656,18 @@ data class ImportContext private constructor(
     }
 }
 
-private val RsPath.pathNamespace: RsPsiFactory.PathNamespace get() = when (context) {
-    is RsPathExpr,
-    is RsStructLiteral,
-    is RsPatStruct,
-    is RsPatTupleStruct -> RsPsiFactory.PathNamespace.VALUES
-    else -> RsPsiFactory.PathNamespace.TYPES
-}
+private val RsPath.pathNamespace: RsPsiFactory.PathNamespace
+    get() = when (context) {
+        is RsPathExpr,
+        is RsStructLiteral,
+        is RsPatStruct,
+        is RsPatTupleStruct -> RsPsiFactory.PathNamespace.VALUES
+        else -> RsPsiFactory.PathNamespace.TYPES
+    }
 private val RsElement.stdlibAttributes: RsFile.Attributes
     get() = (crateRoot?.containingFile as? RsFile)?.attributes ?: RsFile.Attributes.NONE
 private val RsItemsOwner.firstItem: RsElement get() = itemsAndMacros.first { it !is RsAttr }
-private val <T: RsElement> List<T>.lastElement: T? get() = maxBy { it.textOffset }
+private val <T : RsElement> List<T>.lastElement: T? get() = maxBy { it.textOffset }
 
 private val CargoWorkspace.Target.isStd: Boolean
     get() = pkg.origin == PackageOrigin.STDLIB && normName == AutoInjectedCrates.STD
