@@ -162,6 +162,28 @@ class RsPathCompletionFromIndexTest : RsCompletionTestBase() {
         }
     """)
 
+    fun `test enum variant completion inserts enum before variant even if importing out-of-scope items is disabled`() = doTestByText("""
+        mod a {
+            pub enum Enum {
+                V1
+            }
+        }
+
+        fn main() {
+            let a = V/*caret*/
+        }
+    """, """
+        mod a {
+            pub enum Enum {
+                V1
+            }
+        }
+
+        fn main() {
+            let a = Enum::V1/*caret*/
+        }
+    """, importOutOfScopeItems = false)
+
     fun `test insert handler`() = doTestByText("""
         mod foo {
             pub fn bar(x: i32) {}
